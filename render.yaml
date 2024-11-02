@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: aero-aura # You can replace this with your app's name
+    env: node
+    buildCommand: 'npm install' # Command to install dependencies
+    startCommand: 'npm start' # Command to start the server
+    envVars:
+      - key: NODE_ENV
+        value: production # Setting the environment to production
+    plan: free # Use the free tier or whichever plan you're on

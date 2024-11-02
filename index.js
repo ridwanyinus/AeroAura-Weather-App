@@ -16,9 +16,10 @@ app.set('view engine', 'ejs');
 
 app.use(
   session({
-    secret: process.env.SESSION_SECRET, // Load the secret from environment variables
+    secret: process.env.SESSION_SECRET, // Replace with a secure, unique key
     resave: false,
     saveUninitialized: true,
+    cookie: { secure: process.env.NODE_ENV === 'production' }, // Set to true if using HTTPS
   }),
 );
 

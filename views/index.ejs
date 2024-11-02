@@ -6,21 +6,18 @@
     <link rel="stylesheet" href="/styles/global.css" />
     <link rel="icon" href="/android-chrome-192x192.png" type="image/jpeg" />
     <meta name="description" content="A simple weather app" />
-    <title>WeatherLy</title>
+    <title>AeroAura-Weather App</title>
   </head>
-  <body>
-    <% if (forecast) { %>
-    <form action="/search/" method="post">
-      <input type="text" name="search" value="<%= forecast.location.name %>, <%= forecast.location.region %>" placeholder="Search City Name" />
-    </form>
+  <body id="main">
+    <section class="card">
+      <h1 class="app-title">AeroAura Weather App</h1>
+      <img src="/assets/perfect-day.svg" alt="perfect-day" class="perfect-day" />
 
-    <h2><%= forecast.location.name %>, <%= forecast.location.region %></h2>
-    <p>Temperature: <%= forecast.current.temp_c %>°</p>
-    <p>Condition: <%= forecast.current.condition.text %></p>
-    <% } else if (error) { %>
-    <p><%= error %></p>
-    <% } else { %>
-    <p>Loading weather data...</p>
-    <% } %>
+      <h2 class="find">Find Weather of your city</h2>
+      <form action="/search/" method="post">
+        <input type="text" name="search" placeholder="Search any City " />
+        <button class="search" type="submit"><img src="/assets/search.svg" alt="search" class="search" /></button>
+      </form>
+    </section>
   </body>
 </html>

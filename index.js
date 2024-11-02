@@ -14,15 +14,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 app.set('view engine', 'ejs');
 
-app.use(
-  session({
-    secret: '@sjduudhu#bcugugfbufb2345!wertnkvn@ASNIN#@!',
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: process.env.NODE_ENV === 'production' },
-  }),
-);
-
 const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
 
 // Route to render the main page and handle geolocation requests
@@ -33,7 +24,7 @@ app.get('/', async (req, res) => {
 
 app.post('/search/', (req, res) => {
   const coords = req.body.search;
-  req.session.location = coords;
+  app.locals.location = coords;
   res.redirect(`/search-results?location=${encodeURIComponent(coords)}`);
 });
 
@@ -42,8 +33,8 @@ const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric
 
 app.get('/search-results', async (req, res) => {
   const location = req.query.location;
-  req.session.location = location;
-  const day = req.session.dailyId;
+  app.locals.location = location;
+  const day = req.app.locals.dailyId;
   try {
     const result = await axios.get(`${API_URL}?key=${WEATHER_API_KEY}&q=${location}&days=3`);
     const daily = result.data.forecast.forecastday;
@@ -68,8 +59,8 @@ app.get('/search-results', async (req, res) => {
 
 app.get('/search-daily/:id', async (req, res) => {
   const dailyId = req.params.id;
-  req.session.dailyId = dailyId;
-  res.redirect(`/search-results?location=${encodeURIComponent(req.session.location)}`);
+  app.locals.dailyId = dailyId;
+  res.redirect(`/search-results?location=${encodeURIComponent(req.app.locals.location)}`);
 });
 
 app.listen(port, () => {

@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 const API_URL = 'http://api.weatherapi.com/v1/forecast.json';
 
 app.use(express.static('public'));
@@ -16,10 +16,10 @@ app.set('view engine', 'ejs');
 
 app.use(
   session({
-    secret: process.env.SESSION_SECRET, // Replace with a secure, unique key
+    secret: '@sjduudhu#bcugugfbufb2345!wertnkvn@ASNIN#@!',
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: process.env.NODE_ENV === 'production' }, // Set to true if using HTTPS
+    cookie: { secure: process.env.NODE_ENV === 'production' },
   }),
 );
 

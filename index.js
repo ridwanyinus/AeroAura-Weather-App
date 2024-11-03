@@ -74,8 +74,10 @@ app.post('/search/', (req, res) => {
 const now = new Date();
 const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
 
+let location = '';
+
 app.get('/search-results', async (req, res) => {
-  const location = req.query.location;
+  location = req.query.location;
   if (location) {
     req.session.location = location;
   }
@@ -107,7 +109,7 @@ app.get('/search-daily/:id', async (req, res) => {
   if (dailyId) {
     req.session.dailyId = dailyId;
   }
-  res.redirect(`/search-results?location=${encodeURIComponent(req.session.location)}`);
+  res.redirect(`/search-results?location=${encodeURIComponent(location)}`);
 });
 
 app.listen(port, () => {

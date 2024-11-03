@@ -1,7 +1,9 @@
 import axios from 'axios';
 import express from 'express';
 import bodyParser from 'body-parser';
-import sessionMiddleware from './sessionConfig.js';
+import RedisStore from 'connect-redis';
+import session from 'express-session';
+import { createClient } from 'redis';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -13,11 +15,35 @@ app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 app.set('view engine', 'ejs');
-app.use(sessionMiddleware);
 
 const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
 
-// Route to render the main page and handle geolocation requests
+// Initialize client.
+let redisClient = createClient({
+  password: process.env.REDIS_PASSWORD,
+  socket: {
+    host: process.env.REDIS_HOST || '127.0.0.1', // Fallback to localhost if not set
+    port: process.env.REDIS_PORT || 6379,
+  },
+});
+
+await redisClient.connect().catch(console.error);
+
+// Initialize store.
+let redisStore = new RedisStore({
+  client: redisClient,
+  prefix: 'aeroaura:',
+});
+
+app.use(
+  session({
+    store: redisStore,
+    secret: process.env.SESSION_SECRET, // Replace with your secret
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: true, httpOnly: true }, // Set secure: true if using HTTPS
+  }),
+);
 
 app.get('/', async (req, res) => {
   res.render('index');
@@ -37,9 +63,8 @@ app.get('/search-results', async (req, res) => {
   req.session.location = location;
   const day = req.session.dailyId;
   console.log(day);
-
   try {
-    const result = await axios.get(`${API_URL}?key=d15046a04b314a7386484452242209&q=${location}&days=3`);
+    const result = await axios.get(`${API_URL}?key=${WEATHER_API_KEY}&q=${location}&days=3`);
     const daily = result.data.forecast.forecastday;
     const sunrise = day !== undefined ? daily[day].astro.sunrise.slice(0, 5) : daily[0].astro.sunrise.slice(0, 5);
     const sunriseUnit = daily[0].astro.sunrise.slice(-2);

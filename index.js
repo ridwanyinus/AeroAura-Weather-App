@@ -16,8 +16,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 app.set('view engine', 'ejs');
 
-const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
-const REDIS_USERNAME = process.env.REDIS_USERNAME;
+const WEATHER_API_KEY = process.env.WEATHER_API_KEY || 'd15046a04b314a7386484452242209';
 const REDIS_TOKEN = process.env.REDIS_TOKEN;
 const REDIS_URL = process.env.REDIS_URL;
 const REDIS_PORT = process.env.REDIS_PORT || 6379;

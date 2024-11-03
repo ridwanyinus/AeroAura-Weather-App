@@ -38,7 +38,7 @@ let redisStore = new RedisStore({
 app.use(
   session({
     store: redisStore,
-    secret: process.env.SESSION_SECRET, // Replace with your secret
+    secret: 'keyboard cat', // Replace with your secret
     resave: false,
     saveUninitialized: true,
     cookie: { secure: false, httpOnly: true }, // Set secure: true if using HTTPS

@@ -20,11 +20,7 @@ const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
 
 // Initialize client.
 let redisClient = createClient({
-  password: process.env.REDIS_PASSWORD,
-  socket: {
-    host: process.env.REDIS_HOST, // Fallback to localhost if not set
-    port: process.env.REDIS_PORT,
-  },
+  url: process.env.REDIS_URL,
 });
 
 await redisClient.connect().catch(console.error);

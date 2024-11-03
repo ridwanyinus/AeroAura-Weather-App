@@ -17,10 +17,24 @@ app.use(express.json());
 app.set('view engine', 'ejs');
 
 const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
+const REDIS_USERNAME = process.env.REDIS_USERNAME;
+const REDIS_TOKEN = process.env.REDIS_TOKEN;
+const REDIS_URL = process.env.REDIS_URL;
+const REDIS_PORT = process.env.REDIS_PORT || 6379;
+
+const isProd = process.env.NODE_ENV === 'production';
+
+if (isProd) {
+  dotenv.config();
+}
 
 // Initialize client.
 let redisClient = createClient({
-  url: process.env.REDIS_URL,
+  password: REDIS_TOKEN,
+  socket: {
+    host: REDIS_URL,
+    port: REDIS_PORT,
+  },
 });
 
 await redisClient.connect().catch(console.error);
@@ -34,10 +48,15 @@ let redisStore = new RedisStore({
 app.use(
   session({
     store: redisStore,
-    secret: 'keyboard cat', // Replace with your secret
+    secret: process.env.SESSION_SECRET || 'keyboard cat',
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: true, httpOnly: true }, // Set secure: true if using HTTPS
+    cookie: {
+      secure: isProd,
+      httpOnly: true,
+      sameSite: isProd ? 'none' : 'lax',
+    },
+    rolling: true,
   }),
 );
 
@@ -58,7 +77,6 @@ app.get('/search-results', async (req, res) => {
   const location = req.query.location;
   req.session.location = location;
   const day = req.session.dailyId;
-  console.log(day);
   try {
     const result = await axios.get(`${API_URL}?key=${WEATHER_API_KEY}&q=${location}&days=3`);
     const daily = result.data.forecast.forecastday;

@@ -65,7 +65,9 @@ app.get('/', async (req, res) => {
 
 app.post('/search/', (req, res) => {
   const coords = req.body.search;
-  req.session.location = coords;
+  if (coords) {
+    req.session.location = coords;
+  }
   res.redirect(`/search-results?location=${encodeURIComponent(coords)}`);
 });
 
@@ -74,7 +76,9 @@ const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric
 
 app.get('/search-results', async (req, res) => {
   const location = req.query.location;
-  req.session.location = location;
+  if (location) {
+    req.session.location = location;
+  }
   const day = req.session.dailyId;
   try {
     const result = await axios.get(`${API_URL}?key=${WEATHER_API_KEY}&q=${location}&days=3`);
@@ -100,7 +104,9 @@ app.get('/search-results', async (req, res) => {
 
 app.get('/search-daily/:id', async (req, res) => {
   const dailyId = req.params.id;
-  req.session.dailyId = dailyId;
+  if (dailyId) {
+    req.session.dailyId = dailyId;
+  }
   res.redirect(`/search-results?location=${encodeURIComponent(req.session.location)}`);
 });
 

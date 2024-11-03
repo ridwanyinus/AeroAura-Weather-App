@@ -74,7 +74,7 @@ app.post('/search/', (req, res) => {
 const now = new Date();
 const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
 
-let location = '';
+let location = 'auto:ip';
 
 app.get('/search-results', async (req, res) => {
   location = req.query.location;

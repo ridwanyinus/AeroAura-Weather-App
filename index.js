@@ -10,6 +10,7 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 const API_URL = 'http://api.weatherapi.com/v1/forecast.json';
+const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
 
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -51,7 +52,7 @@ app.get('/', async (req, res) => {
 app.post('/search/', (req, res) => {
   const coords = req.body.search;
   if (coords) {
-    req.session.location = coords;
+    req.session.location = coords; // Save location to session
   }
   res.redirect(`/search-results?location=${encodeURIComponent(coords)}`);
 });
@@ -59,22 +60,27 @@ app.post('/search/', (req, res) => {
 const now = new Date();
 const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
 
-let location = 'auto:ip';
-
 app.get('/search-results', async (req, res) => {
-  location = req.query.location;
-  if (location) {
-    req.session.location = location;
-  }
+  const location = req.query.location || req.session.location || 'auto:ip'; // Fallback to 'auto:ip'
+  req.session.location = location; // Update session location if needed
+
   const day = req.session.dailyId;
   try {
-    const result = await axios.get(`${API_URL}?key=${WEATHER_API_KEY}&q=${location}&days=3`);
+    const result = await axios.get(API_URL, {
+      params: {
+        key: WEATHER_API_KEY,
+        q: location,
+        days: '3',
+      },
+    });
+
     const daily = result.data.forecast.forecastday;
     const sunrise = day !== undefined ? daily[day].astro.sunrise.slice(0, 5) : daily[0].astro.sunrise.slice(0, 5);
     const sunriseUnit = daily[0].astro.sunrise.slice(-2);
     const sunset = day !== undefined ? daily[day].astro.sunset.slice(0, 5) : daily[0].astro.sunset.slice(0, 5);
     const sunsetUnit = daily[0].astro.sunset.slice(-2);
-    const currentHour = now.getHours();
+    const currentHour = new Date().getHours();
+
     const sortedForecast = daily[0].hour.filter((forecast) => new Date(forecast.time).getHours() >= currentHour).sort((a, b) => new Date(a.time) - new Date(b.time));
 
     const forecast = day !== undefined ? daily[day].hour.filter((forecast) => new Date(forecast.time).getHours() >= currentHour).sort((a, b) => new Date(a.time) - new Date(b.time)) : sortedForecast;
@@ -89,12 +95,12 @@ app.get('/search-results', async (req, res) => {
   }
 });
 
-app.get('/search-daily/:id', async (req, res) => {
+app.get('/search-daily/:id', (req, res) => {
   const dailyId = req.params.id;
   if (dailyId) {
-    req.session.dailyId = dailyId;
+    req.session.dailyId = dailyId; // Save daily ID in session
   }
-  res.redirect(`/search-results?location=${encodeURIComponent(location)}`);
+  res.redirect(`/search-results?location=${encodeURIComponent(req.session.location || 'auto:ip')}`);
 });
 
 app.listen(port, () => {

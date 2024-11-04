@@ -116,8 +116,7 @@ app.get('/search-results', async (req, res) => {
       console.log('Error response status:', error.response.status);
       console.log('Error response headers:', error.response.headers);
 
-      // Send a status code and message to the client that matches the actual error
-      res.status(error.response.status).send(error.response.data);
+      // res.status(error.response.status).send(error.response.data);
     } else if (error.request) {
       // Request was made but no response was received
       console.error('No response received:', error.request);
@@ -134,6 +133,7 @@ app.get('/search-daily/:id', (req, res) => {
   const dailyId = req.params.id;
   if (dailyId) {
     req.session.dailyId = dailyId;
+    console.log(req.session.location);
   }
 
   res.redirect(`/search-results?location=${encodeURIComponent(req.session.location)}`);

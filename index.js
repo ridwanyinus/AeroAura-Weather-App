@@ -84,13 +84,7 @@ app.get('/search-results', async (req, res) => {
 
   const day = req.session.dailyId;
   try {
-    const result = await axios.get(API_URL, {
-      params: {
-        key: WEATHER_API_KEY,
-        q: location,
-        days: '3',
-      },
-    });
+    const result = await axios.get(`${API_URL}?key=${WEATHER_API_KEY}&q=${location}&days=3`);
 
     const daily = result.data.forecast.forecastday;
     const sunrise = day !== undefined ? daily[day].astro.sunrise.slice(0, 5) : daily[0].astro.sunrise.slice(0, 5);

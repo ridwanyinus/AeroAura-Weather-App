@@ -10,7 +10,7 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 const API_URL = 'http://api.weatherapi.com/v1/forecast.json';
-const WEATHER_API_KEY = 'd15046a04b314a7386484452242209';
+const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
 
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));

@@ -17,24 +17,38 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 app.set('view engine', 'ejs');
 
-const client = createClient({
-  url: process.env.REDIS_URL,
+let redisClient = createClient({
+  url: process.env.REDIS_URL || 'redis://localhost:6379',
 });
 
-client.on('error', (err) => {
+async function connectRedis() {
+  try {
+    await redisClient.connect();
+    console.log('Connected to Redis successfully');
+  } catch (error) {
+    console.error('Failed to connect to Redis:', error);
+  }
+}
+connectRedis();
+
+redisClient.on('error', (err) => {
   console.log('Could not establish a connection with Redis. ' + err);
 });
 
-client.on('connect', () => {
+redisClient.on('connect', () => {
   console.log('Connected to Redis successfully');
 });
 
-await client.connect();
+// Initialize Redis store
+const redisStore = new RedisStore({
+  client: redisClient,
+  prefix: 'aeroaura:',
+});
 
 app.use(
   session({
-    store: new RedisStore({ client: client }),
-    secret: process.env.SESSION_SECRET,
+    store: redisStore,
+    secret: process.env.SESSION_SECRET || 'keyboard cat',
     resave: false,
     saveUninitialized: false,
     cookie: {

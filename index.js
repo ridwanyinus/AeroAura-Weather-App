@@ -46,7 +46,7 @@ redisClient.on('connect', () => {
 // Initialize Redis store
 const redisStore = new RedisStore({
   client: redisClient,
-  prefix: 'aeroaura:',
+  prefix: 'aeroaura-w:',
 });
 
 app.use(

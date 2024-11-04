@@ -46,7 +46,7 @@ redisClient.on('connect', () => {
 // Initialize Redis store
 const redisStore = new RedisStore({
   client: redisClient,
-  prefix: 'aeroaura:',
+  // prefix: 'aeroaura:',
 });
 
 app.use(
@@ -55,10 +55,12 @@ app.use(
     secret: process.env.SESSION_SECRET || 'keyboard cat',
     resave: false,
     saveUninitialized: false,
+    rolling: true,
     cookie: {
       secure: process.env.NODE_ENV === 'production',
       httpOnly: true,
       sameSite: 'strict',
+      maxAge: 1000 * 60 * 60 * 24,
     },
   }),
 );
@@ -80,9 +82,10 @@ const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric
 
 app.get('/search-results', async (req, res) => {
   const location = req.query.location || req.session.location; // Fallback to 'auto:ip'
-  req.session.location = location; // Update session location if needed
+  req.session.location = location;
 
   const day = req.session.dailyId;
+
   try {
     const result = await axios.get(`${API_URL}?key=${WEATHER_API_KEY}&q=${location}&days=3`);
 
@@ -99,7 +102,6 @@ app.get('/search-results', async (req, res) => {
 
     const date = formatDate(new Date());
     const dailyDate = day !== undefined ? formatDate(new Date(daily[day].date), false) : date;
-
     res.render('search', { forecast: result.data, sunrise, sunriseUnit, sunset, sunsetUnit, date: dailyDate, time, sortedForecast: forecast, formatHour, daily, formatDay });
   } catch (error) {
     console.error('Error fetching weather data:', error);
@@ -110,8 +112,9 @@ app.get('/search-results', async (req, res) => {
 app.get('/search-daily/:id', (req, res) => {
   const dailyId = req.params.id;
   if (dailyId) {
-    req.session.dailyId = dailyId; // Save daily ID in session
+    req.session.dailyId = dailyId;
   }
+
   res.redirect(`/search-results?location=${encodeURIComponent(req.session.location)}`);
 });
 

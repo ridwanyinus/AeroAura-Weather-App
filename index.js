@@ -18,7 +18,11 @@ app.use(express.json());
 app.set('view engine', 'ejs');
 
 let redisClient = createClient({
-  url: 'redis://default:Db21ISWmwueTOAKzxH9YQa1BnlKi7lHf@redis-18790.c275.us-east-1-4.ec2.redns.redis-cloud.com:18790',
+  password: 'Db21ISWmwueTOAKzxH9YQa1BnlKi7lHf',
+  socket: {
+    host: 'redis-18790.c275.us-east-1-4.ec2.redns.redis-cloud.com',
+    port: 18790,
+  },
 });
 
 async function connectRedis() {

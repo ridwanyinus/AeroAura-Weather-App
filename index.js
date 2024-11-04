@@ -134,9 +134,6 @@ app.get('/search-daily/:id', (req, res) => {
     console.log(req.session.location);
   }
 
-
-  
-
   res.redirect(`/search-results?location=${encodeURIComponent(req.session.location)}`);
 });
 

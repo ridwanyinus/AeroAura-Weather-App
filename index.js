@@ -3,6 +3,8 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import session from 'express-session';
 import dotenv from 'dotenv';
+import { createClient } from 'redis';
+import RedisStore from 'connect-redis';
 
 dotenv.config();
 const app = express();
@@ -14,12 +16,31 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 app.set('view engine', 'ejs');
 
+const client = createClient({
+  url: process.env.REDIS_URL,
+});
+
+client.on('error', (err) => {
+  console.log('Could not establish a connection with Redis. ' + err);
+});
+
+client.on('connect', () => {
+  console.log('Connected to Redis successfully');
+});
+
+await client.connect();
+
 app.use(
   session({
-    secret: '@sjduudhu#bcugugfbufb2345!wertnkvn@ASNIN#@!',
+    store: new RedisStore({ client: client }),
+    secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: true,
-    cookie: { secure: process.env.NODE_ENV === 'production' },
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+      sameSite: 'strict',
+    },
   }),
 );
 

@@ -16,46 +16,31 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 app.set('view engine', 'ejs');
 
-const WEATHER_API_KEY = process.env.WEATHER_API_KEY || 'd15046a04b314a7386484452242209';
-const REDIS_TOKEN = process.env.REDIS_TOKEN;
-const REDIS_URL = process.env.REDIS_URL;
-const REDIS_PORT = process.env.REDIS_PORT || 6379;
-
-const isProd = process.env.NODE_ENV === 'production';
-
-if (isProd) {
-  dotenv.config();
-}
-
-// Initialize client.
-let redisClient = createClient({
-  password: REDIS_TOKEN,
-  socket: {
-    host: REDIS_URL,
-    port: REDIS_PORT,
-  },
+const client = createClient({
+  url: process.env.REDIS_URL,
 });
 
-await redisClient.connect().catch(console.error);
-
-// Initialize store.
-let redisStore = new RedisStore({
-  client: redisClient,
-  prefix: 'aeroaura:',
+client.on('error', (err) => {
+  console.log('Could not establish a connection with Redis. ' + err);
 });
+
+client.on('connect', () => {
+  console.log('Connected to Redis successfully');
+});
+
+await client.connect();
 
 app.use(
   session({
-    store: redisStore,
-    secret: process.env.SESSION_SECRET || 'keyboard cat',
+    store: new RedisStore({ client: client }),
+    secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     cookie: {
-      secure: isProd,
+      secure: process.env.NODE_ENV === 'production',
       httpOnly: true,
-      sameSite: isProd ? 'none' : 'lax',
+      sameSite: 'strict',
     },
-    rolling: true,
   }),
 );
 

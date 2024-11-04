@@ -18,7 +18,7 @@ app.use(express.json());
 app.set('view engine', 'ejs');
 
 let redisClient = createClient({
-  url: process.env.REDIS_URL || 'redis://localhost:6379',
+  url: 'redis://default:Db21ISWmwueTOAKzxH9YQa1BnlKi7lHf@redis-18790.c275.us-east-1-4.ec2.redns.redis-cloud.com:18790',
 });
 
 async function connectRedis() {
@@ -36,7 +36,7 @@ redisClient.on('error', (err) => {
 });
 
 redisClient.on('connect', () => {
-  console.log('Connected to Redis successfully');
+  console.log('Connected to Redis successfully!');
 });
 
 // Initialize Redis store

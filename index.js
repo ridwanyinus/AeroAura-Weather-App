@@ -55,9 +55,8 @@ app.use(
     secret: process.env.SESSION_SECRET || 'keyboard cat',
     resave: false,
     saveUninitialized: false,
-    rolling: true,
     cookie: {
-      secure: process.env.NODE_ENV === 'production',
+      secure: false,
       httpOnly: true,
       sameSite: 'strict',
       maxAge: 1000 * 60 * 60 * 24,

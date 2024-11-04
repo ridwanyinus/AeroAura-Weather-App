@@ -46,7 +46,7 @@ redisClient.on('connect', () => {
 // Initialize Redis store
 const redisStore = new RedisStore({
   client: redisClient,
-  // prefix: 'aeroaura:',
+  prefix: 'aeroaura:',
 });
 
 app.use(
@@ -87,7 +87,13 @@ app.get('/search-results', async (req, res) => {
   const day = req.session.dailyId;
 
   try {
-    const result = await axios.get(`${API_URL}?key=${WEATHER_API_KEY}&q=${location}&days=3`);
+    const result = await axios.get('http://api.weatherapi.com/v1/forecast.json', {
+      params: {
+        key: WEATHER_API_KEY, // Set your API key here
+        q: location, // Use the location parameter
+        days: 3, // Forecast for 3 days
+      },
+    });
 
     const daily = result.data.forecast.forecastday;
     const sunrise = day !== undefined ? daily[day].astro.sunrise.slice(0, 5) : daily[0].astro.sunrise.slice(0, 5);
@@ -104,8 +110,23 @@ app.get('/search-results', async (req, res) => {
     const dailyDate = day !== undefined ? formatDate(new Date(daily[day].date), false) : date;
     res.render('search', { forecast: result.data, sunrise, sunriseUnit, sunset, sunsetUnit, date: dailyDate, time, sortedForecast: forecast, formatHour, daily, formatDay });
   } catch (error) {
-    console.error('Error fetching weather data:', error);
-    res.status(500).send('Internal Server Error');
+    if (error.response) {
+      // Axios received a response with an error status code (e.g., 400, 404, etc.)
+      console.log('Error response data:', error.response.data);
+      console.log('Error response status:', error.response.status);
+      console.log('Error response headers:', error.response.headers);
+
+      // Send a status code and message to the client that matches the actual error
+      res.status(error.response.status).send(error.response.data);
+    } else if (error.request) {
+      // Request was made but no response was received
+      console.error('No response received:', error.request);
+      res.status(503).send('Service Unavailable');
+    } else {
+      // Other errors, such as configuration or network errors
+      console.error('Error fetching weather data:', error.message);
+      res.status(500).send('Internal Server Error');
+    }
   }
 });
 

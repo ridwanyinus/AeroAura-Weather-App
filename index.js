@@ -79,7 +79,7 @@ const now = new Date();
 const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
 
 app.get('/search-results', async (req, res) => {
-  const location = req.query.location || req.session.location || 'auto:ip'; // Fallback to 'auto:ip'
+  const location = req.query.location || req.session.location; // Fallback to 'auto:ip'
   req.session.location = location; // Update session location if needed
 
   const day = req.session.dailyId;
@@ -112,7 +112,7 @@ app.get('/search-daily/:id', (req, res) => {
   if (dailyId) {
     req.session.dailyId = dailyId; // Save daily ID in session
   }
-  res.redirect(`/search-results?location=${encodeURIComponent(req.session.location || 'auto:ip')}`);
+  res.redirect(`/search-results?location=${encodeURIComponent(req.session.location)}`);
 });
 
 app.listen(port, () => {

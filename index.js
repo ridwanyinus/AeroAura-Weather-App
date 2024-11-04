@@ -9,7 +9,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
-const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
+const WEATHER_API_KEY = 'd15046a04b314a7386484452242209';
 
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -70,7 +70,7 @@ app.get('/', async (req, res) => {
 app.post('/search/', (req, res) => {
   const coords = req.body.search;
   if (coords) {
-    req.session.location = coords; // Save location to session
+    req.session.location = coords;
   }
   res.redirect(`/search-results?location=${encodeURIComponent(coords)}`);
 });
@@ -79,7 +79,7 @@ const now = new Date();
 const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
 
 app.get('/search-results', async (req, res) => {
-  const location = req.query.location || req.session.location; // Fallback to 'auto:ip'
+  const location = req.query.location || req.session.location;
   req.session.location = location;
 
   const day = req.session.dailyId;
@@ -87,8 +87,8 @@ app.get('/search-results', async (req, res) => {
   try {
     const result = await axios.get('http://api.weatherapi.com/v1/forecast.json', {
       params: {
-        key: WEATHER_API_KEY, // Set your API key here
-        q: location, // Use the location parameter
+        key: WEATHER_API_KEY,
+        q: location,
         days: 3, // Forecast for 3 days
       },
     });
@@ -133,6 +133,9 @@ app.get('/search-daily/:id', (req, res) => {
     req.session.dailyId = dailyId;
     console.log(req.session.location);
   }
+
+
+  
 
   res.redirect(`/search-results?location=${encodeURIComponent(req.session.location)}`);
 });

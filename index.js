@@ -119,22 +119,91 @@ app.get('/search-results', async (req, res) => {
       // Request was made but no response was received
       console.error('No response received:', error.request);
       res.status(503).send('Service Unavailable');
+    }
+    if (error.response && error.response.status === 400 && error.response.data.error.code === 1006) {
+      res.render('not-found');
     } else {
-      // Other errors, such as configuration or network errors
       console.error('Error fetching weather data:', error.message);
       res.status(500).send('Internal Server Error');
     }
   }
 });
 
-app.get('/search-daily/:id', (req, res) => {
+app.get('/search-daily/:id', async (req, res) => {
   const dailyId = req.params.id;
   if (dailyId) {
     req.session.dailyId = dailyId;
-    console.log(req.session.location);
+  }
+  const location = req.session.location;
+  if (dailyId == 0) {
+    res.redirect(`/search-results?location=${encodeURIComponent(req.session.location)}`);
   }
 
-  res.redirect(`/search-results?location=${encodeURIComponent(req.session.location)}`);
+  try {
+    const result = await axios.get('http://api.weatherapi.com/v1/forecast.json', {
+      params: {
+        key: WEATHER_API_KEY,
+        q: location,
+        days: 3, // Forecast for 3 days
+      },
+    });
+    const daily = result.data.forecast.forecastday;
+    const weatherThree = daily[dailyId];
+
+    function checkUv(uv) {
+      if (uv <= 2) {
+        return 'Low';
+      } else if (uv <= 5) {
+        return 'Moderate ';
+      } else if (uv <= 7) {
+        return 'High ';
+      } else if (uv <= 10) {
+        return 'Very High ';
+      } else {
+        return 'Extreme ';
+      }
+    }
+
+    const uvIndex = weatherThree.day.uv;
+    const uvRiskLevel = checkUv(uvIndex);
+    console.log(uvRiskLevel);
+
+    const sunrise = dailyId !== undefined ? daily[dailyId].astro.sunrise.slice(0, 5) : daily[0].astro.sunrise.slice(0, 5);
+    const sunriseUnit = daily[0].astro.sunrise.slice(-2);
+    const sunset = dailyId !== undefined ? daily[dailyId].astro.sunset.slice(0, 5) : daily[0].astro.sunset.slice(0, 5);
+    const sunsetUnit = daily[0].astro.sunset.slice(-2);
+    const currentHour = new Date().getHours();
+
+    const sortedForecast = daily[0].hour.filter((forecast) => new Date(forecast.time).getHours() >= currentHour).sort((a, b) => new Date(a.time) - new Date(b.time));
+
+    const forecast =
+      dailyId !== undefined ? daily[dailyId].hour.filter((forecast) => new Date(forecast.time).getHours() >= currentHour).sort((a, b) => new Date(a.time) - new Date(b.time)) : sortedForecast;
+
+    const date = formatDate(new Date());
+    const dailyDate = dailyId !== undefined ? formatDate(new Date(daily[dailyId].date), false) : date;
+    res.render('weather-3days', {
+      forecast: result.data,
+      sunrise,
+      sunriseUnit,
+      sunset,
+      sunsetUnit,
+      date: dailyDate,
+      time,
+      sortedForecast: forecast,
+      formatHour,
+      daily,
+      formatDay,
+      weatherThree,
+      uvRiskLevel,
+    });
+  } catch (error) {
+    if (error.response && error.response.status === 400 && error.response.data.error.code === 1006) {
+      res.render('not-found');
+    } else {
+      console.error('Error fetching weather data:', error.message);
+      res.status(500).send('Internal Server Error');
+    }
+  }
 });
 
 app.listen(port, () => {

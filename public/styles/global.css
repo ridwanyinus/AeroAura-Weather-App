@@ -199,7 +199,7 @@ form {
   width: max-content;
   height: max-content;
   margin-top: 3rem;
-  margin-left: 1rem;
+  margin-left: 1.5rem;
   margin-bottom: 0.5rem;
   border-bottom: 1px solid #b7a8a4;
 }
@@ -445,4 +445,16 @@ footer {
   padding-top: 1rem;
   width: 90vw;
   font-size: 14px;
+}
+
+.high-low {
+  display: flex;
+  padding: 0 1.5rem;
+  padding-top: 0.5rem;
+}
+
+.high-low p {
+  font-size: 1.5rem;
+  color: white;
+  font-weight: 600;
 }

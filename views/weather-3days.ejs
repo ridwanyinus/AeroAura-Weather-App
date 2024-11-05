@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AeroAura-Weather App- 3days</title>
+    <link rel="stylesheet" href="/styles/global.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="icon" href="/icon.png" type="image/png" />
+  </head>
+  <body id="search-body">
+    <form action="/search/" method="post" class="search-form">
+      <input type="text" name="search" placeholder="Search City" />
+      <button class="search" type="submit"><img src="/assets/search.svg" alt="search" class="search" /></button>
+    </form>
+    <section class="card-info">
+      <div class="search-head">
+        <a href="/" class="logo">AeroAura</a>
+        <div class="search-container">
+          <img src="/assets/map-search.svg" alt="map search" />
+          <p><%= forecast.location.name %>, <%= forecast.location.country %></p>
+        </div>
+      </div>
+      <p class="degree"><%= weatherThree.day.avgtemp_c %>°<span>C</span></p>
+
+      <p class="condition"><%= weatherThree.day.condition.text %></p>
+      <div class="high-low search-head">
+        <p>↑ <%= weatherThree.day.maxtemp_c %>°C</p>
+        <p>↓ <%= weatherThree.day.mintemp_c %>°C</p>
+      </div>
+      <h3>Weather Info</h3>
+      <div class="info-box">
+        <div class="box">
+          <p class="box-title">Humidity</p>
+          <div class="box-content">
+            <img src="/assets/humidity.svg" alt="humidity" />
+
+            <div class="box-content-info">
+              <p class="value"><%= weatherThree.day.avghumidity %></p>
+              <p class="unit">%</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="box">
+          <p class="box-title">Visibility</p>
+          <div class="box-content">
+            <img src="/assets/binoculars.svg" alt="Visibility" />
+
+            <div class="box-content-info">
+              <p class="value"><%= weatherThree.day.avgvis_miles %></p>
+              <p class="unit">miles</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="box">
+          <p class="box-title">Wind</p>
+          <div class="box-content">
+            <img src="/assets/wind.svg" alt="wind" />
+
+            <div class="box-content-info">
+              <p class="value"><%= weatherThree.day.maxwind_mph %></p>
+              <p class="unit">M/h</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="box">
+          <p class="box-title">UV Index</p>
+          <div class="box-content">
+            <img src="/assets/uv-index.svg" alt="uv-index" />
+
+            <div class="box-content-info">
+              <p class="value"><%= weatherThree.day.uv %></p>
+              <p class="unit"><%= uvRiskLevel %></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="box">
+          <p class="box-title">Sunrise</p>
+          <div class="box-content">
+            <img src="/assets/sunrise.svg" alt="Sunrise " />
+
+            <div class="box-content-info">
+              <p class="value"><%= sunrise %></p>
+              <p class="unit"><%= sunriseUnit %></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="box">
+          <p class="box-title">Sunset</p>
+          <div class="box-content">
+            <img src="/assets/sunset.svg" alt="sunset " />
+
+            <div class="box-content-info">
+              <p class="value"><%= sunset %></p>
+              <p class="unit"><%= sunsetUnit %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card-details">
+      <div class="today">
+        <p class="time"><%= time %></p>
+        <h3 class="date"><%= date %></h3>
+        <img src="<%= forecast.current.condition.icon %>" alt="condition-icon " />
+      </div>
+
+      <div class="hourly">
+        <h3>Hourly Forecast</h3>
+        <div class="hourly-content">
+          <% for (let index = 0; index < weatherThree.hour.length; index++) {%>
+          <div>
+            <p class="hourly-temp"><%= weatherThree.hour[index].temp_c %>°C</p>
+            <img src="<%= weatherThree.hour[index].condition.icon %>" alt="condition-icon" />
+            <p class="hourly-condition"><%= weatherThree.hour[index].condition.text%></p>
+            <p class="hourly-time"><%= formatHour(weatherThree.hour[index].time) %></p>
+          </div>
+          <%} %>
+        </div>
+      </div>
+
+      <div class="daily">
+        <h3>3 Days Forecast</h3>
+        <div class="daily-content">
+          <% for (let index = 0; index < daily.length; index++) {%>
+          <div>
+            <a href="/search-daily/<%= index%>" class="daily-link">
+              <p class="hourly-temp"><%= daily[index].day.avgtemp_c %>°C</p>
+              <img src="<%= daily[index].day.condition.icon %>" alt="condition-icon" />
+              <p class="daily-time"><%= formatDay(daily[index].date) %></p>
+            </a>
+          </div>
+          <%} %>
+        </div>
+      </div>
+    </section>
+
+    <footer>Design & Built by Riwan Yunus</footer>
+  </body>
+</html>

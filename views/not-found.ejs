@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AeroAura-Weather - Location Not Found</title>
+    <link rel="stylesheet" href="/styles/global.css" />
+  </head>
+  <body id="main">
+    <section class="card">
+      <h1 class="app-title">No matching location found.</h1>
+      <img src="/assets/not-listed-location.svg" alt="perfect-day" />
+
+      <h2 class="find">Please enter a valid location</h2>
+      <form action="/search/" method="post">
+        <input type="text" name="search" placeholder="Search any City " />
+        <button class="search" type="submit"><img src="/assets/search.svg" alt="search" class="search" /></button>
+      </form>
+    </section>
+  </body>
+</html>

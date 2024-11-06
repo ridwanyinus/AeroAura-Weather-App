@@ -1,6 +1,5 @@
 import axios from 'axios';
 import express from 'express';
-import bodyParser from 'body-parser';
 import RedisStore from 'connect-redis';
 import session from 'express-session';
 import { createClient } from 'redis';
@@ -12,7 +11,7 @@ const port = process.env.PORT || 3000;
 const WEATHER_API_KEY = 'd15046a04b314a7386484452242209';
 
 app.use(express.static('public'));
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.set('view engine', 'ejs');
 
@@ -63,9 +62,7 @@ app.use(
   }),
 );
 
-app.get('/', async (req, res) => {
-  res.render('index');
-});
+app.get('/', (req, res) => res.render('index'));
 
 app.post('/search/', (req, res) => {
   const coords = req.body.search;
@@ -81,21 +78,18 @@ app.post('/search/', (req, res) => {
   });
 });
 
-const now = new Date();
-const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
-
 app.get('/search-results', async (req, res) => {
   const location = req.query.location || req.session.location;
   req.session.location = location;
 
   const day = req.session.dailyId;
-
+  const time = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
   try {
     const result = await axios.get('http://api.weatherapi.com/v1/forecast.json', {
       params: {
         key: WEATHER_API_KEY,
         q: location,
-        days: 3, // Forecast for 3 days
+        days: 3,
       },
     });
 
@@ -112,17 +106,10 @@ app.get('/search-results', async (req, res) => {
 
     const date = formatDate(new Date());
     const dailyDate = day !== undefined ? formatDate(new Date(daily[day].date), false) : date;
+
     res.render('search', { forecast: result.data, sunrise, sunriseUnit, sunset, sunsetUnit, date: dailyDate, time, sortedForecast: forecast, formatHour, daily, formatDay });
   } catch (error) {
-    if (error.response && error.response.status === 400 && error.response.data.error.code === 1006) {
-      res.render('not-found');
-    } else if (error.request) {
-      console.error('No response received:', error.request);
-      res.status(503).send('Service Unavailable');
-    } else {
-      console.error('Error fetching weather data:', error.message);
-      res.status(500).send('Internal Server Error');
-    }
+    handleWeatherError(error, res);
   }
 });
 
@@ -146,24 +133,8 @@ app.get('/search-daily/:id', async (req, res) => {
     });
     const daily = result.data.forecast.forecastday;
     const weatherThree = daily[dailyId];
-
-    function checkUv(uv) {
-      if (uv <= 2) {
-        return 'Low';
-      } else if (uv <= 5) {
-        return 'Moderate ';
-      } else if (uv <= 7) {
-        return 'High ';
-      } else if (uv <= 10) {
-        return 'Very High ';
-      } else {
-        return 'Extreme ';
-      }
-    }
-
-    const uvIndex = weatherThree.day.uv;
-    const uvRiskLevel = checkUv(uvIndex);
-
+    const uvRiskLevel = checkUv(weatherThree.day.uv);
+    const time = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
     const sunrise = dailyId !== undefined ? daily[dailyId].astro.sunrise.slice(0, 5) : daily[0].astro.sunrise.slice(0, 5);
     const sunriseUnit = daily[0].astro.sunrise.slice(-2);
     const sunset = dailyId !== undefined ? daily[dailyId].astro.sunset.slice(0, 5) : daily[0].astro.sunset.slice(0, 5);
@@ -177,6 +148,7 @@ app.get('/search-daily/:id', async (req, res) => {
 
     const date = formatDate(new Date());
     const dailyDate = dailyId !== undefined ? formatDate(new Date(daily[dailyId].date), false) : date;
+
     res.render('weather-3days', {
       forecast: result.data,
       sunrise,
@@ -193,48 +165,49 @@ app.get('/search-daily/:id', async (req, res) => {
       uvRiskLevel,
     });
   } catch (error) {
-    if (error.response && error.response.status === 400 && error.response.data.error.code === 1006) {
-      res.render('not-found');
-    } else if (error.request) {
-      console.error('No response received:', error.request);
-      res.status(503).send('Service Unavailable');
-    } else {
-      console.error('Error fetching weather data:', error.message);
-      res.status(500).send('Internal Server Error');
-    }
+    handleWeatherError(error, res);
   }
 });
 
-app.get('/about', (req, res) => {
-  res.render('about');
-});
+app.get('/about', (req, res) => res.render('about'));
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
 
+// Utility functions
 function formatDate(date, includeDay = true) {
   const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  const monthIndex = date.getMonth();
-  const day = date.getDate();
-  const year = date.getFullYear();
 
-  if (includeDay) {
-    const currentDay = daysOfWeek[now.getDay()];
-    return `${currentDay}, ${day} ${months[monthIndex]} ${year}`;
-  } else {
-    return `${day} ${months[monthIndex]} ${year}`;
-  }
+  return includeDay ? `${daysOfWeek[date.getDay()]}, ${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}` : `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
 }
 
 function formatHour(hourlyTime) {
-  const formatedHour = new Date(hourlyTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
-  return formatedHour;
+  return new Date(hourlyTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
 }
 
-function formatDay(params) {
+function formatDay(dateString) {
   const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  const currentDay = daysOfWeek[new Date(params).getDay()];
-  return currentDay;
+  return daysOfWeek[new Date(dateString).getDay()];
+}
+
+function checkUv(uv) {
+  if (uv <= 2) return 'Low';
+  if (uv <= 5) return 'Moderate';
+  if (uv <= 7) return 'High';
+  if (uv <= 10) return 'Very High';
+  return 'Extreme';
+}
+
+function handleWeatherError(error, res) {
+  if (error.response && error.response.status === 400 && error.response.data.error.code === 1006) {
+    res.render('not-found');
+  } else if (error.request) {
+    console.error('No response received:', error.request);
+    res.status(503).send('Service Unavailable');
+  } else {
+    console.error('Error fetching weather data:', error.message);
+    res.status(500).send('Internal Server Error');
+  }
 }

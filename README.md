@@ -1,4 +1,6 @@
 <h1 align="center">Welcome to aeroaura 👋</h1>
+![aeroaura](https://github.com/user-attachments/assets/7cd43ab5-4072-408b-8043-31706586257d)
+
 <p>
   <img alt="Version" src="https://img.shields.io/badge/version-1.0.0-blue.svg?cacheSeconds=2592000" />
   <a href="#" target="_blank">

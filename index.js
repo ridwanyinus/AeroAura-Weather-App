@@ -136,7 +136,7 @@ app.get('/search-daily/:id', async (req, res) => {
   }
   const location = req.session.location;
   if (dailyId == 0) {
-    res.redirect(`/search-results?location=${encodeURIComponent(req.session.location)}`);
+    return res.redirect(`/search-results?location=${encodeURIComponent(req.session.location)}`);
   }
 
   try {

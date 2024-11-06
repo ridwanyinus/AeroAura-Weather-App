@@ -9,11 +9,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
   </head>
   <body id="main">
-    <section class="card">
+    <section class="card not-found">
       <h1 class="app-title">No matching location found.</h1>
       <img src="/assets/not-listed-location.svg" alt="perfect-day" />
 
       <h2 class="find">Please enter a valid location</h2>
+      <p class="example">For precise locations, enter the region and country name in the search bar. <span>[example: Madrid, Spain]</span></p>
       <form action="/search/" method="post">
         <input type="text" name="search" placeholder="Search any City " />
         <button class="search" type="submit"><img src="/assets/search.svg" alt="search" class="search" /></button>

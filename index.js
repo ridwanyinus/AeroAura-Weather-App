@@ -73,6 +73,12 @@ app.post('/search/', (req, res) => {
     req.session.location = coords;
   }
   res.redirect(`/search-results?location=${encodeURIComponent(coords)}`);
+
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Session destruction error:', err);
+    }
+  });
 });
 
 const now = new Date();
@@ -166,7 +172,6 @@ app.get('/search-daily/:id', async (req, res) => {
 
     const uvIndex = weatherThree.day.uv;
     const uvRiskLevel = checkUv(uvIndex);
-    console.log(uvRiskLevel);
 
     const sunrise = dailyId !== undefined ? daily[dailyId].astro.sunrise.slice(0, 5) : daily[0].astro.sunrise.slice(0, 5);
     const sunriseUnit = daily[0].astro.sunrise.slice(-2);
@@ -204,6 +209,10 @@ app.get('/search-daily/:id', async (req, res) => {
       res.status(500).send('Internal Server Error');
     }
   }
+});
+
+app.get('/about', (req, res) => {
+  res.render('about');
 });
 
 app.listen(port, () => {

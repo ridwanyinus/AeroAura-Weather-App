@@ -13,6 +13,12 @@
 
 ### ✨ [Demo](https://aeroaura-weather-app.onrender.com/)
 
+
+
+https://github.com/user-attachments/assets/bb37d683-346d-492d-981e-336ea8ea6b40
+
+
+
 ## Install
 
 ```sh

@@ -114,20 +114,11 @@ app.get('/search-results', async (req, res) => {
     const dailyDate = day !== undefined ? formatDate(new Date(daily[day].date), false) : date;
     res.render('search', { forecast: result.data, sunrise, sunriseUnit, sunset, sunsetUnit, date: dailyDate, time, sortedForecast: forecast, formatHour, daily, formatDay });
   } catch (error) {
-    if (error.response) {
-      // Axios received a response with an error status code (e.g., 400, 404, etc.)
-      console.log('Error response data:', error.response.data);
-      console.log('Error response status:', error.response.status);
-      console.log('Error response headers:', error.response.headers);
-
-      // res.status(error.response.status).send(error.response.data);
-    } else if (error.request) {
-      // Request was made but no response was received
-      console.error('No response received:', error.request);
-      res.status(503).send('Service Unavailable');
-    }
     if (error.response && error.response.status === 400 && error.response.data.error.code === 1006) {
       res.render('not-found');
+    } else if (error.request) {
+      console.error('No response received:', error.request);
+      res.status(503).send('Service Unavailable');
     } else {
       console.error('Error fetching weather data:', error.message);
       res.status(500).send('Internal Server Error');
@@ -204,6 +195,9 @@ app.get('/search-daily/:id', async (req, res) => {
   } catch (error) {
     if (error.response && error.response.status === 400 && error.response.data.error.code === 1006) {
       res.render('not-found');
+    } else if (error.request) {
+      console.error('No response received:', error.request);
+      res.status(503).send('Service Unavailable');
     } else {
       console.error('Error fetching weather data:', error.message);
       res.status(500).send('Internal Server Error');

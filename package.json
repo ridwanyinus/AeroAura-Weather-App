@@ -7,7 +7,6 @@
     "ejs": "^3.1.10",
     "express": "^4.18.2",
     "express-session": "^1.18.1",
-    "ioredis": "^5.4.1",
     "nodemon": "^3.1.7",
     "redis": "^4.7.0"
   },
@@ -18,8 +17,17 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "weather",
+    "forecast",
+    "Express",
+    "Axios",
+    "EJS",
+    "hourly forecast",
+    "3-day forecast",
+    "location search"
+  ],
   "author": "Ridwan Yunus",
   "license": "ISC",
-  "description": ""
+  "description": "AeroAura 🌤️ is a weather app built with Express, Axios, and EJS, providing accurate hourly and 3-day forecasts for any location worldwide."
 }

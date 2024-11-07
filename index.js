@@ -9,7 +9,6 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 const WEATHER_API_KEY = 'd15046a04b314a7386484452242209';
-
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -104,8 +103,10 @@ app.get('/search-results', async (req, res) => {
 
     const forecast = day !== undefined ? daily[day].hour.filter((forecast) => new Date(forecast.time).getHours() >= currentHour).sort((a, b) => new Date(a.time) - new Date(b.time)) : sortedForecast;
 
-    const date = formatDate(new Date());
-    const dailyDate = day !== undefined ? formatDate(new Date(daily[day].date), false) : date;
+    const date = new Date(daily[0].date);
+    const dailyDate = new Intl.DateTimeFormat('en-US', {
+      dateStyle: 'full',
+    }).format(date);
 
     res.render('search', { forecast: result.data, sunrise, sunriseUnit, sunset, sunsetUnit, date: dailyDate, time, sortedForecast: forecast, formatHour, daily, formatDay });
   } catch (error) {
@@ -146,8 +147,10 @@ app.get('/search-daily/:id', async (req, res) => {
     const forecast =
       dailyId !== undefined ? daily[dailyId].hour.filter((forecast) => new Date(forecast.time).getHours() >= currentHour).sort((a, b) => new Date(a.time) - new Date(b.time)) : sortedForecast;
 
-    const date = formatDate(new Date());
-    const dailyDate = dailyId !== undefined ? formatDate(new Date(daily[dailyId].date), false) : date;
+    const date = new Date(daily[dailyId].date);
+    const dailyDate = new Intl.DateTimeFormat('en-US', {
+      dateStyle: 'full',
+    }).format(date);
 
     res.render('weather-3days', {
       forecast: result.data,
@@ -176,12 +179,6 @@ app.listen(port, () => {
 });
 
 // Utility functions
-function formatDate(date, includeDay = true) {
-  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
-  return includeDay ? `${daysOfWeek[date.getDay()]}, ${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}` : `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
-}
 
 function formatHour(hourlyTime) {
   return new Date(hourlyTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });

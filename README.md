@@ -18,8 +18,8 @@
 https://github.com/user-attachments/assets/bb37d683-346d-492d-981e-336ea8ea6b40
 
 
-<h3>API URL</h3>
-https://www.weatherapi.com/
+<h3>API URL</h3> https://www.weatherapi.com/
+
 ## Install
 
 ```sh

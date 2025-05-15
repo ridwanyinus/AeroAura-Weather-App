@@ -44,7 +44,7 @@ npm run test
 
 👤 **Ridwan Yunus**
 
-* Website: https://ridwanyinus.is-a.dev
+* Website: https://ridwan.is-a.dev
 * Github: [@ridwanyinus](https://github.com/ridwanyinus)
 
 ## 🤝 Contributing
